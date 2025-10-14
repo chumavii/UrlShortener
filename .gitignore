@@ -27,6 +27,10 @@ bld/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+appsettings.*.json
+Properties/launchSettings.json
+docker-compose.yml
+.vs/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
