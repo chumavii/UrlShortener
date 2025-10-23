@@ -65,4 +65,4 @@ jobs:
       # Tear down Docker containers after tests
       - name: Stop and clean up
         if: always()
-        run: docker-compose -f docker-compose.test.yml down -v
+        run: docker compose -f docker-compose.test.yml down -v
