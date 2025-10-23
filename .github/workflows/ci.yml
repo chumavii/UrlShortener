@@ -15,9 +15,7 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      REDIS_HOST: ${{ secrets.REDIS_HOST }}
-      ConnectionStrings__Default: "Host=localhost;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
-      Redis__Host: "localhost"
+      REDIS_HOST: redis-test
 
     steps:
       - name: Checkout repository
@@ -34,33 +32,31 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      # Spin up Postgres + Redis using your docker-compose.test.yml
+      # Spin up Postgres + Redis using docker-compose.test.yml
       - name: Start dependencies
         run: docker compose -f docker-compose.test.yml up -d
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
 
       # Wait for Postgres and Redis to be ready
-      - name: Wait for services
+      - name: Wait for Postgres & Redis
         run: |
           echo "Waiting for Postgres & Redis..."
-          for i in {1..10}; do
-            pg_isready -h localhost -U $POSTGRES_USER && redis-cli ping && break
+          for i in {1..20}; do
+            docker exec urlshortener-db-test pg_isready -U $POSTGRES_USER && \
+            docker exec urlshortener-redis-test redis-cli ping | grep PONG && break
             echo "Still waiting..."
             sleep 3
           done
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
 
       # Run Integration Tests (uses actual DB + Redis containers)
       - name: Run Tests
         run: dotnet test ./UrlShortener.Tests --configuration Release --no-build --logger "trx;LogFileName=integration_tests.trx"
         env:
-          ConnectionStrings__Default: "Host=localhost;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
-          Redis__Host: "localhost"
+          ConnectionStrings__Default: "Host=urlshortener-db-test;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
+          Redis__Host: "urlshortener-redis-test"
 
       # Tear down Docker containers after tests
       - name: Stop and clean up
