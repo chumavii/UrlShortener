@@ -4,7 +4,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
+EXPOSE 80
 EXPOSE 8081
 
 
@@ -12,8 +12,8 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["UrlShortener/UrlShortener.csproj", "UrlShortener/"]
-RUN dotnet restore "./UrlShortener/UrlShortener.csproj"
+COPY ["UrlShortener/UrlShortener.csproj", "."]
+RUN dotnet restore "./UrlShortener.csproj"
 COPY . .
 WORKDIR "/src/UrlShortener"
 RUN dotnet build "./UrlShortener.csproj" -c $BUILD_CONFIGURATION -o /app/build

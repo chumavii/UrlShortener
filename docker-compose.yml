@@ -1,0 +1,48 @@
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: UrlShortener/Dockerfile
+    container_name: urlshortener-api
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80 
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - Redis__Host=${REDIS_HOST}
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15
+    container_name: urlshortener-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7
+    container_name: urlshortener-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  pgdata:
+  redis-insight-data:

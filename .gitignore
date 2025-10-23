@@ -29,7 +29,8 @@ project.fragment.lock.json
 artifacts/
 appsettings.*.json
 Properties/launchSettings.json
-docker-compose.yml
+docker-compose.override.yml
+.env
 .vs/
 
 # ASP.NET Scaffolding

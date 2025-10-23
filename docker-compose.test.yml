@@ -1,0 +1,36 @@
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: urlshortener-db-test
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: urlshortener-redis-test
+    ports:
+      - "6379:6379"
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  test-network:
+    driver: bridge

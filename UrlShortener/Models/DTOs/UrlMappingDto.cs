@@ -4,7 +4,7 @@ namespace UrlShortener.Models.DTOs
 {
     public class UrlMappingDto
     {
-        [Required]
+        [Required(ErrorMessage = "URL cannot be empty")]
         public required string OriginalUrl { get; set; }
     }
 }

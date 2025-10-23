@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -6,16 +6,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>fa0ab643-2cf6-4754-926b-edd1ca4be33b</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.11" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.9.25" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
@@ -26,8 +30,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\.env" Link=".env" />
+    <None Include="..\.github\workflows\ci.yml" Link="ci.yml" />
     <None Include="..\.gitignore" Link=".gitignore" />
+    <None Include="..\docker-compose.override.yml" Link="docker-compose.override.yml" />
+    <None Include="..\docker-compose.test.yml" Link="docker-compose.test.yml" />
     <None Include="..\docker-compose.yml" Link="docker-compose.yml" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Utilities.Encoding\Utilities.Encode.csproj" />
+  </ItemGroup>
+
 
 </Project>

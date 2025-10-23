@@ -1,0 +1,68 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    env:
+      ASPNETCORE_ENVIRONMENT: Test
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ variables.POSTGRES_DB }}
+      REDIS_HOST: ${{ variables.REDIS_HOST }}
+      ConnectionStrings__Default: "Host=localhost;Database=${{ variables.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
+      Redis__Host: "localhost"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      # Spin up Postgres + Redis using your docker-compose.test.yml
+      - name: Start dependencies
+        run: docker-compose -f docker-compose.test.yml up -d
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ variables.POSTGRES_DB }}
+          REDIS_HOST: ${{ variables.REDIS_HOST }}
+
+      # Wait for Postgres and Redis to be ready
+      - name: Wait for services
+        run: |
+          echo "Waiting for Postgres & Redis..."
+          for i in {1..10}; do
+            pg_isready -h localhost -U $POSTGRES_USER && redis-cli ping && break
+            echo "Still waiting..."
+            sleep 3
+          done
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+
+      # Run Integration Tests (uses actual DB + Redis containers)
+      - name: Run Tests
+        run: dotnet test ./UrlShortener.Tests --configuration Release --no-build --logger "trx;LogFileName=integration_tests.trx"
+        env:
+          ConnectionStrings__Default: "Host=localhost;Database=${{ variables.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
+          Redis__Host: "localhost"
+
+      # Tear down Docker containers after tests
+      - name: Stop and clean up
+        if: always()
+        run: docker-compose -f docker-compose.test.yml down -v
