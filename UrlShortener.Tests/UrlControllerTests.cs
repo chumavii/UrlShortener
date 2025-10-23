@@ -8,6 +8,7 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Moq;
 using StackExchange.Redis;
+using System.Net.Http.Json;
 using UrlShortener;
 using UrlShortener.Controllers;
 using UrlShortener.Data;
@@ -158,5 +159,6 @@ namespace UrlShortener.Tests
             //Assert
             Assert.Contains("HTTP request cannot be null", ex.Message);
         }
+
     }
 }
