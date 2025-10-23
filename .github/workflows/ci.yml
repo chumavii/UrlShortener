@@ -14,9 +14,9 @@ jobs:
       ASPNETCORE_ENVIRONMENT: Test
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      POSTGRES_DB: ${{ variables.POSTGRES_DB }}
-      REDIS_HOST: ${{ variables.REDIS_HOST }}
-      ConnectionStrings__Default: "Host=localhost;Database=${{ variables.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      ConnectionStrings__Default: "Host=localhost;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
       Redis__Host: "localhost"
 
     steps:
@@ -40,8 +40,8 @@ jobs:
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ variables.POSTGRES_DB }}
-          REDIS_HOST: ${{ variables.REDIS_HOST }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
 
       # Wait for Postgres and Redis to be ready
       - name: Wait for services
@@ -59,7 +59,7 @@ jobs:
       - name: Run Tests
         run: dotnet test ./UrlShortener.Tests --configuration Release --no-build --logger "trx;LogFileName=integration_tests.trx"
         env:
-          ConnectionStrings__Default: "Host=localhost;Database=${{ variables.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
+          ConnectionStrings__Default: "Host=localhost;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
           Redis__Host: "localhost"
 
       # Tear down Docker containers after tests
