@@ -1,14 +1,22 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using UrlShortener.Data;
 using UrlShortener.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-var redis = ConnectionMultiplexer.Connect(builder.Configuration["Redis:Host"] ?? "localhost:6379");
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = builder.Configuration["Redis:Host"] ?? "localhost:6379";
+    var options = ConfigurationOptions.Parse(config);
+    options.AbortOnConnectFail = false; // Don't crash on first failed attempt
+    options.ConnectRetry = 5;
+    options.ConnectTimeout = 5000;
+    return ConnectionMultiplexer.Connect(options);
+});
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
-builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -29,7 +37,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>("Database")
-    .AddRedis(redis);
+    .AddRedis(
+        builder.Configuration["Redis:Host"] ?? "localhost:6379",
+        name: "redis",
+        failureStatus: HealthStatus.Degraded
+    );
 
 builder.WebHost.UseUrls("http://+:80");
 var app = builder.Build();
