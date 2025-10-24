@@ -28,7 +28,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<ApplicationDbContext>("Database");
+    .AddDbContextCheck<ApplicationDbContext>("Database")
+    .AddRedis(redis);
 
 builder.WebHost.UseUrls("http://+:80");
 var app = builder.Build();
