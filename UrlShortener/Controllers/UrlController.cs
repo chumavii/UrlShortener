@@ -29,7 +29,7 @@ namespace UrlShortener.Controllers
             var originalUrl = EnsureUrlHasScheme(model.OriginalUrl);
 
             //Url scheme needs to be valid
-            if (!Uri.TryCreate(originalUrl, UriKind.Absolute, out var uriResult) || 
+            if (!Uri.TryCreate(originalUrl, UriKind.Absolute, out var uriResult) ||
                 (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
                 return BadRequest("Invalid URL format.");
 
@@ -93,11 +93,10 @@ namespace UrlShortener.Controllers
             {
                 try
                 {
-                    Console.WriteLine($"Cached: {cachedUrl}");
                     if (IsBrowserRequest(Request))
                         return Redirect(EnsureUrlHasScheme(cachedUrl.ToString()));
 
-                    return Ok(cachedUrl.ToString());
+                    return Ok(new { originalUrl = cachedUrl.ToString() });
                 }
                 catch (Exception e)
                 {
@@ -113,7 +112,7 @@ namespace UrlShortener.Controllers
             if (IsBrowserRequest(Request))
                 return Redirect(entity.OriginalUrl);
 
-            return Ok(new { entity.OriginalUrl });
+            return Ok(new { originalUrl = entity.OriginalUrl });
         }
 
         private string EnsureUrlHasScheme(string url)
