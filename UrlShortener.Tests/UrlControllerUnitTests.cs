@@ -1,15 +1,9 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Headers;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Moq;
 using StackExchange.Redis;
-using System.Net.Http.Json;
-using UrlShortener;
 using UrlShortener.Controllers;
 using UrlShortener.Data;
 using UrlShortener.Models;
@@ -17,14 +11,14 @@ using UrlShortener.Models.DTOs;
 
 namespace UrlShortener.Tests
 {
-    public class UrlControllerTests : IClassFixture<WebApplicationFactory<Program>>
+    public class UrlControllerUnitTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
         private readonly UrlController _controller;
         private readonly ApplicationDbContext _context;
         private readonly Mock<IConnectionMultiplexer> _redisMock;
 
-        public UrlControllerTests(WebApplicationFactory<Program> factory)
+        public UrlControllerUnitTests(WebApplicationFactory<Program> factory)
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())

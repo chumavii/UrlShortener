@@ -37,7 +37,7 @@ namespace UrlShortener.Controllers
             var db = _redis.GetDatabase();
             var cachedCode = await db.StringGetAsync($"url:{originalUrl}");
             if (!cachedCode.IsNullOrEmpty)
-                return Ok(new { shortUrl = $"{Request.Host}/{cachedCode}" });
+                return Ok(new { shortUrl = $"{Request.Scheme}://{Request.Host}/{cachedCode}" });
 
             //If record is in db but not cache, add to cache then return short url
             var existing = await _context.UrlMappings.FirstOrDefaultAsync(x => x.OriginalUrl == originalUrl);
@@ -51,7 +51,7 @@ namespace UrlShortener.Controllers
                 catch (Exception e)
                 {
                     Console.WriteLine($"Failed to cache URL mapping for {existing.OriginalUrl}", e.Message);
-                    return Ok(new { shortUrl = $"{Request.Host}/{existing.ShortCode}" });
+                    return Ok(new { shortUrl = $"{Request.Scheme}://{Request.Host}/{existing.ShortCode}" });
                 }
             }
 
@@ -88,6 +88,8 @@ namespace UrlShortener.Controllers
         public async Task<ActionResult> RedirectToOriginal(string shortCode)
         {
             var db = _redis.GetDatabase();
+
+            //Check if shortcode is stored in cache and return original URL if it is
             var cachedUrl = await db.StringGetAsync(shortCode);
             if (!cachedUrl.IsNullOrEmpty)
             {
@@ -104,9 +106,11 @@ namespace UrlShortener.Controllers
                 }
             }
 
+            //If record isnt in cache, check database 
             var entity = await _context.UrlMappings.FirstOrDefaultAsync(x => x.ShortCode == shortCode);
             if (entity == null) return NotFound("Short URL not found.");
 
+            //Store record in cache
             await db.StringSetAsync(shortCode, entity.OriginalUrl);
 
             if (IsBrowserRequest(Request))
