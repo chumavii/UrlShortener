@@ -27,9 +27,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<ApplicationDbContext>("Database")
-    .AddRedis(redis);
+if (!builder.Environment.IsEnvironment("Test"))
+{
+    builder.Services.AddHealthChecks()
+        .AddDbContextCheck<ApplicationDbContext>("Database")
+        .AddRedis(redis);
+}
 
 builder.WebHost.UseUrls("http://+:80");
 var app = builder.Build();
