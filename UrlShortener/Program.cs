@@ -96,10 +96,21 @@ app.MapHealthChecks("/health");
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"))
 {
-    //Migrations
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    //Apply pending migrations if any
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var pendingMigrations = dbContext.Database.GetPendingMigrations();
+
+        if (pendingMigrations.Any())
+        {
+            Console.WriteLine("Applying pending migrations...");
+            dbContext.Database.Migrate();
+            Console.WriteLine("Migrations applied successfully.");
+        }
+        else
+            Console.WriteLine("No pending migrations found. Database is up to date.");
+    }
 
     app.UseSwagger();
     app.UseSwaggerUI(options =>
