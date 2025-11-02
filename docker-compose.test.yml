@@ -1,22 +1,5 @@
 
 services:
-  api:
-    build:
-      context: .
-      dockerfile: UrlShortener/Dockerfile
-    container_name: urlshortener-api-test
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Test
-      - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-      - Redis__Host=redis:6379
-    networks:
-      - test-network
 
   postgres:
     image: postgres:15
