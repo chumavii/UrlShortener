@@ -43,17 +43,23 @@ jobs:
       # Wait for Postgres and Redis to be ready
       - name: Wait for Postgres & Redis
         run: |
-          echo "Waiting for Postgres & Redis..."
-          for i in {1..20}; do
-              if docker exec urlshortener-db-test pg_isready -U $POSTGRES_USER && \
-                  docker exec urlshortener-redis-test redis-cli ping | grep -q PONG; then
-              echo "Dependencies ready!"
-              sleep 5  # allow warm-up
-              break
+            echo "Waiting for Postgres & Redis..."
+            for i in {1..20}; do
+              POSTGRES_OK=$(docker exec urlshortener-db-test pg_isready -U $POSTGRES_USER > /dev/null && echo true || echo false)
+              REDIS_OK=$(docker exec urlshortener-redis-test redis-cli ping | grep -q PONG && echo true || echo false)
+              if [ "$POSTGRES_OK" = true ] && [ "$REDIS_OK" = true ]; then
+                echo "Postgres & Redis are ready!"
+                sleep 5
+                break
               fi
-              echo "Still waiting..."
+              if [ "$i" -eq 20 ]; then
+                echo "Dependencies failed to start in time."
+                docker compose -f docker-compose.test.yml logs
+                exit 1
+              fi
+              echo "Still waiting... ($i/20)"
               sleep 3
-          done
+            done
 
       - name: Small buffer before running tests
         run: sleep 5

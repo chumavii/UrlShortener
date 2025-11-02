@@ -10,7 +10,14 @@ using UrlShortener.Data;
 using UrlShortener.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-var redis = ConnectionMultiplexer.Connect(builder.Configuration["Redis:Host"] ?? "localhost:6379");
+var redisHost = builder.Configuration["Redis:Host"] ?? "localhost:6379";
+var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
+{
+    EndPoints = { redisHost },
+    AbortOnConnectFail = false, // keeps retrying until ready
+    ConnectRetry = 5,          
+    ConnectTimeout = 5000       
+});
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
