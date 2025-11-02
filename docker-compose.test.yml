@@ -1,5 +1,22 @@
 
 services:
+  api:
+    build:
+      context: .
+      dockerfile: UrlShortener/Dockerfile
+    container_name: urlshortener-api-test
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Test
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - Redis__Host=redis:6379
+    networks:
+      - test-network
 
   postgres:
     image: postgres:15
@@ -10,27 +27,60 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
-    networks:
-      - test-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - test-network
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
 
   redis:
     image: redis:7
     container_name: urlshortener-redis-test
     ports:
       - "6379:6379"
-    networks:
-      - test-network
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - test-network
+    volumes:
+      - redisdata-test:/data
+
+  tests:
+    build:
+        context: .
+        dockerfile: UrlShortener.Tests/Dockerfile
+    container_name: urlshortener-tests
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Test
+        - ConnectionStrings__Default=Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+        - Redis__Host=redis:6379
+    networks:
+      - test-network
+    command: >
+      bash -c "
+      dotnet restore &&
+      dotnet build --configuration Release &&
+      dotnet test --no-build --configuration Release --logger 'trx;LogFileName=integration_tests.trx' --verbosity normal
+      "
 
 networks:
   test-network:
     driver: bridge
+
+volumes:
+  pgdata-test:
+  redisdata-test:

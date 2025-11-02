@@ -15,7 +15,6 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      REDIS_HOST: localhost:6379
 
     steps:
       - name: Checkout repository
@@ -26,52 +25,23 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build solution
-        run: dotnet build --configuration Release --no-restore
-
-      # Spin up Postgres + Redis using docker-compose.test.yml
-      - name: Start dependencies
-        run: docker compose -f docker-compose.test.yml up -d
+      # Build base images (optional but faster if cached)
+      - name: Build Docker images
+        run: docker compose -f docker-compose.test.yml build
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
 
-      # Wait for Postgres and Redis to be ready
-      - name: Wait for Postgres & Redis
-        run: |
-            echo "Waiting for Postgres & Redis..."
-            for i in {1..20}; do
-              POSTGRES_OK=$(docker exec urlshortener-db-test pg_isready -U $POSTGRES_USER > /dev/null && echo true || echo false)
-              REDIS_OK=$(docker exec urlshortener-redis-test redis-cli ping | grep -q PONG && echo true || echo false)
-              if [ "$POSTGRES_OK" = true ] && [ "$REDIS_OK" = true ]; then
-                echo "Postgres & Redis are ready!"
-                sleep 5
-                break
-              fi
-              if [ "$i" -eq 20 ]; then
-                echo "Dependencies failed to start in time."
-                docker compose -f docker-compose.test.yml logs
-                exit 1
-              fi
-              echo "Still waiting... ($i/20)"
-              sleep 3
-            done
-
-      - name: Small buffer before running tests
-        run: sleep 5
-
-      # Run Integration Tests (uses actual DB + Redis containers)
-      - name: Run Tests
-        run: dotnet test ./UrlShortener.Tests --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration_tests.trx"
+      # Run tests in Docker (api, postgres, redis, tests)
+      - name: Run Integration Tests inside Docker
+        run: docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
         env:
-          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }}"
-          Redis__Host: "localhost:6379"
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
 
-      # Tear down Docker containers after tests
-      - name: Stop and clean up
+      # Always tear down containers
+      - name: Cleanup containers
         if: always()
         run: docker compose -f docker-compose.test.yml down -v

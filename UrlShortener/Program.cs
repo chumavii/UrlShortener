@@ -101,7 +101,7 @@ var app = builder.Build();
 
 app.MapHealthChecks("/health");
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"))
 {
     //Apply pending migrations if any
     using (var scope = app.Services.CreateScope())
