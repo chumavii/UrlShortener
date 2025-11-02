@@ -1,6 +1,10 @@
 import { useState, type FormEvent } from "react";
 
-const BASE_URL = import.meta.env.VITE_API_BACKEND_URL;
+const BASE_URL = import.meta.env.VITE_API_BACKEND_URL || '';
+if (!BASE_URL) {
+    console.error('VITE_API_BACKEND_URL is not set');
+}
+
 interface ShortenResponse {
     shortUrl: string;
 }
@@ -35,7 +39,9 @@ function App() {
                 setResult(data.shortUrl);
             } else {
                 // Expand short URL
-                const shortCode = input.trim().split("/").pop(); // Extract after last slash
+                const urlPattern = /\/?([^\/\s]+)$/;
+                const match = input.trim().match(urlPattern);
+                const shortCode = match?.[1];
                 if (!shortCode) throw new Error("Invalid short URL format");
 
                 const response = await fetch(`${BASE_URL}${shortCode}`);

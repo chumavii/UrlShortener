@@ -15,7 +15,7 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      REDIS_HOST: localhost:6379
 
     steps:
       - name: Checkout repository
@@ -61,8 +61,8 @@ jobs:
       - name: Run Tests
         run: dotnet test ./UrlShortener.Tests --configuration Release --no-build --logger "trx;LogFileName=integration_tests.trx"
         env:
-          ConnectionStrings__Default: "Host=urlshortener-db-test;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5432"
-          Redis__Host: "${{ secrets.REDIS_HOST }}"
+          ConnectionStrings__Default: "Host=localhost;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }};Port=5433"
+          Redis__Host: "localhost:6379"
 
       # Tear down Docker containers after tests
       - name: Stop and clean up

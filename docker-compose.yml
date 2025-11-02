@@ -17,6 +17,8 @@ services:
       - Redis__Host=${REDIS_HOST}
     networks:
       - app-network
+    volumes:
+      - ./Logs:/app/Logs 
 
   postgres:
     image: postgres:15
@@ -46,3 +48,4 @@ networks:
 volumes:
   pgdata:
   redis-insight-data:
+

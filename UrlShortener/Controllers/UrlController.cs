@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System;
@@ -9,6 +10,7 @@ using Utilities.Encode;
 
 namespace UrlShortener.Controllers
 {
+    [EnableRateLimiting("PerIpLimit")]
     [ApiController]
     [Route("/")]
     public class UrlController(ApplicationDbContext context, IConnectionMultiplexer redis) : ControllerBase
@@ -96,8 +98,12 @@ namespace UrlShortener.Controllers
                 try
                 {
                     if (IsBrowserRequest(Request))
+                    {
+                        Console.WriteLine("Is browser request: " + true);
                         return Redirect(EnsureUrlHasScheme(cachedUrl.ToString()));
+                    }
 
+                    Console.WriteLine("Is browser request: " + false);
                     return Ok(new { originalUrl = cachedUrl.ToString() });
                 }
                 catch (Exception e)
@@ -133,21 +139,18 @@ namespace UrlShortener.Controllers
 
             if (request.Headers.TryGetValue("User-Agent", out var userAgent))
             {
-                Console.WriteLine($"User Agent: {userAgent}");
                 if (userAgent.ToString().ToLower().Contains("postman"))
                     return false;
             }
 
             if (request.Headers.TryGetValue("Sec-Fetch-Mode", out var mode))
             {
-                Console.WriteLine($"Mode: {mode}");
                 if (mode.ToString().ToLower() == "cors")
                     return false;
             }
 
             if (request.Headers.TryGetValue("Referer", out var referer))
             {
-                Console.WriteLine($"Referer: {referer}");
                 if (referer.ToString().ToLower().Contains("swagger"))
                     return false;
             }

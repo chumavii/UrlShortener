@@ -72,6 +72,21 @@ namespace UrlShortener.Tests
             Assert.Contains(longUrl, content);
         }
 
+        [Fact]
+        public async Task RateLimiter_ShouldReturn429_AfterLimitReached()
+        {
+            // Arrange
+            var urlDto = new { originalUrl = "https://thisisatest.com" };
+            HttpResponseMessage response = null!;
 
+            // Act - send 6 requests quickly to exceed the 5/10s limit
+            for (int i = 0; i < 6; i++)
+            {
+                response = await _client.PostAsJsonAsync("/", urlDto);
+            }
+
+            // Assert - last one should be throttled
+            Assert.Equal(System.Net.HttpStatusCode.TooManyRequests, response.StatusCode);
+        }
     }
 }

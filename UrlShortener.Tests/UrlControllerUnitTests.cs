@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using StackExchange.Redis;
+using System.Net.Http.Json;
 using UrlShortener.Controllers;
 using UrlShortener.Data;
 using UrlShortener.Models;
