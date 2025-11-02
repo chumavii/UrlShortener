@@ -11,16 +11,8 @@ using UrlShortener.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var redis = ConnectionMultiplexer.Connect(builder.Configuration["Redis:Host"] ?? "localhost:6379");
-try
-{
-    Console.WriteLine($"[INIT] Connecting to Redis");
-    builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"[ERROR] Redis connection failed: {ex.Message}");
-    throw;
-}
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
