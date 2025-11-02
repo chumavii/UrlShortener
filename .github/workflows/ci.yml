@@ -15,7 +15,7 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      REDIS_HOST: localhost:6379
+      REDIS_HOST: urlshortener-redis-test
 
     steps:
       - name: Checkout repository
