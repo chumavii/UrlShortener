@@ -93,8 +93,14 @@ builder.WebHost.UseUrls("http://+:80");
 var app = builder.Build();
 
 app.MapHealthChecks("/health");
-if (app.Environment.IsDevelopment())
+
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"))
 {
+    //Migrations
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {

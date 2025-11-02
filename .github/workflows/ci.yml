@@ -43,16 +43,17 @@ jobs:
       # Wait for Postgres and Redis to be ready
       - name: Wait for Postgres & Redis
         run: |
-            echo "Waiting for Postgres & Redis..."
-            for i in {1..20}; do
-                if docker exec urlshortener-db-test pg_isready -U $POSTGRES_USER && \
-                    docker exec urlshortener-redis-test redis-cli ping | grep -q PONG; then
-                echo "Dependencies ready!"
-                break
-                fi
-                echo "Still waiting..."
-                sleep 3
-            done
+          echo "Waiting for Postgres & Redis..."
+          for i in {1..20}; do
+              if docker exec urlshortener-db-test pg_isready -U $POSTGRES_USER && \
+                  docker exec urlshortener-redis-test redis-cli ping | grep -q PONG; then
+              echo "Dependencies ready!"
+              sleep 5  # allow warm-up
+              break
+              fi
+              echo "Still waiting..."
+              sleep 3
+          done
 
       - name: Small buffer before running tests
         run: sleep 5
@@ -61,7 +62,7 @@ jobs:
       - name: Run Tests
         run: dotnet test ./UrlShortener.Tests --configuration Release --no-build --logger "trx;LogFileName=integration_tests.trx"
         env:
-          ConnectionStrings__Default: "Host=localhost;;Port=5432;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }}"
+          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=${{ secrets.POSTGRES_DB }};Username=${{ secrets.POSTGRES_USER }};Password=${{ secrets.POSTGRES_PASSWORD }}"
           Redis__Host: "localhost:6379"
 
       # Tear down Docker containers after tests
