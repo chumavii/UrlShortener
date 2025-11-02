@@ -56,11 +56,7 @@ namespace UrlShortener.Tests
             var response = await _client.GetAsync("/health");
 
             //Assert
-            Assert.True(
-            response.StatusCode == System.Net.HttpStatusCode.OK ||
-            response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable,
-            $"Unexpected status: {response.StatusCode}"
-            );
+            Assert.True(response.StatusCode == System.Net.HttpStatusCode.OK);
         }
 
         [Fact]
