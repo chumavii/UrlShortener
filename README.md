@@ -5,7 +5,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql)
 ![Redis](https://img.shields.io/badge/Cache-Redis-DC382D?logo=redis)
-![GitHub Actions](https://img.shields.io/github/actions/workflow/status/yourusername/urlshortener/ci.yml?label=CI%20Build&logo=github)
+![GitHub Actions](https://img.shields.io/github/actions/workflow/status/chumavii/url-shortener/ci.yml?label=CI%20Build&logo=github)
 ![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)
 
 ---
