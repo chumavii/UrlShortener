@@ -1,4 +1,4 @@
-# ✂️ URL Shortener
+# URL Shortener
 
 ![.NET](https://img.shields.io/badge/.NET-8.0-blue?logo=dotnet)
 ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?logo=react)
@@ -10,7 +10,7 @@
 
 ---
 
-## 🧩 Overview
+## Overview
 
 A **full-stack URL shortening service** built with **.NET 8 Web API**, **PostgreSQL**, and **Redis**, paired with a **React + Vite** frontend.  
 The backend is **containerized with Docker** for consistent development, testing, and deployment, while the frontend is **deployed on Vercel** for fast, globally distributed delivery.
@@ -19,19 +19,19 @@ The backend is **containerized with Docker** for consistent development, testing
 
 ---
 
-## 🚀 Features
+## Features
 
-- ✂️ Shorten long URLs into clean, shareable links  
-- 🔄 Expand shortened URLs back to their original form  
-- 💾 Persistent storage with **PostgreSQL**  
-- ⚡ High-speed caching using **Redis**  
-- 🧪 Automated integration testing via **xUnit + GitHub Actions**  
-- 🐳 **Dockerized backend** for seamless local and CI environments  
-- 🌐 **React + Vite frontend**, deployed on **Vercel**
+- Shorten long URLs into clean, shareable links  
+- Expand shortened URLs back to their original form  
+- Persistent storage with **PostgreSQL**  
+- High-speed caching using **Redis**  
+- Automated integration testing via **xUnit + GitHub Actions**  
+- **Dockerized backend** for seamless local and CI environments  
+- **React + Vite frontend**, deployed on **Vercel**
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-------------|
@@ -48,17 +48,17 @@ The backend is **containerized with Docker** for consistent development, testing
 ⚙️ Local Development
 
 ```bash
-1️⃣ Clone the repository
+1️. Clone the repository
 git clone https://github.com/chumavii/UrlShortener.git
 cd urlshortener
 
-2️⃣ Create a .env file
+2️. Create a .env file
 POSTGRES_USER=
 POSTGRES_PASSWORD=
 POSTGRES_DB=
 REDIS_HOST=
 
-3️⃣ Run the backend with Docker Compose
+3️. Run the backend with Docker Compose
 docker compose up --build
 This starts:
 - The .NET 8 API
@@ -67,12 +67,12 @@ This starts:
 
 API available at → http://localhost:8080
 
-4️⃣ Run the frontend (Vite)
+4️. Run the frontend (Vite)
 cd urlshortener.ui
 npm install
 npm run dev
 
-🧪 Running Tests
+Running Tests
 To run the full integration test suite locally:
 dotnet test
 
