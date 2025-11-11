@@ -66,6 +66,7 @@ urlshortener/
 └── README.md                     # Project documentation
 ```
 
+
 ---
 
 ## ⚙️ Local Development
@@ -94,9 +95,9 @@ This starts:
  - PostgreSQL
  - Redis
 
-# API available at → http://localhost:8080
+API available at → http://localhost:8080
 
-4️. Run the frontend (Vite)
+4️. Run the frontend (React + Vite)
 ```bash
 cd urlshortener.ui
 npm install
