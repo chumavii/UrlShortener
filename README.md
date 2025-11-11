@@ -31,17 +31,40 @@ The backend is **containerized with Docker** for consistent development, testing
 
 ---
 
-## Tech Stack
+## 🧱 Project Structure
 
-| Layer | Technology |
-|-------|-------------|
-| **Frontend** | React + Vite (TypeScript) |
-| **Backend** | ASP.NET Core 8 Web API |
-| **Database** | PostgreSQL |
-| **Cache** | Redis |
-| **Testing** | xUnit + WebApplicationFactory |
-| **CI/CD** | GitHub Actions |
-| **Deployment** | Backend via Docker / Frontend via Vercel |
+```
+urlshortener/
+│
+├── UrlShortener/                 # Main Web API project
+│   ├── Controllers/              # API endpoints (UrlController)
+│   ├── Data/                     # EF Core DbContext and migrations
+│   ├── Models/                   # Entity and DTO classes
+│   ├── Services/                 # Helper and logic classes (e.g., URL generation)
+│   ├── Middleware/               # Custom middlewares (logging, exception handling)
+│   ├── Program.cs                # Application entry point and service configuration
+│   ├── appsettings.json          # Configuration file
+│   └── Dockerfile                # Backend Docker configuration
+│
+├── UrlShortener.Tests/           # Test project
+│   ├── UnitTests/                # Unit tests for controllers and helpers
+│   ├── IntegrationTests/         # Tests that use real DB/Redis via containers
+│   └── Dockerfile                # Test Docker configuration
+│
+├── Utilities.Encode/             # Helper project for URL encoding
+│   └── Url64Helper.cs            # Base64-style short code generator
+│
+├── urlshortener.ui/              # Frontend (React + Vite)
+│   ├── src/                      # Components, pages, and services
+│   ├── public/                   # Static assets
+│   ├── vite.config.ts            # Vite configuration
+│   └── package.json              # Frontend dependencies
+│
+├── docker-compose.yml            # Local multi-container setup (API + DB + Redis)
+├── docker-compose.test.yml       # Test environment setup for CI
+├── ci.yml                        # GitHub Actions CI pipeline
+└── README.md                     # Project documentation
+```
 
 ---
 
@@ -55,17 +78,21 @@ cd urlshortener
 ```
 
 2️. Create a .env file
+```bash
 POSTGRES_USER=
 POSTGRES_PASSWORD=
 POSTGRES_DB=
 REDIS_HOST=
+```
 
 3️. Run the backend with Docker Compose
+```bash
 docker compose up --build
-# This starts:
-# - The .NET 8 API
-# - PostgreSQL
-# - Redis
+```
+This starts:
+ - The .NET 8 API
+ - PostgreSQL
+ - Redis
 
 # API available at → http://localhost:8080
 
@@ -90,3 +117,26 @@ Your CI pipeline automatically:
 - Spins up PostgreSQL & Redis containers  
 - Waits until services are healthy  
 - Runs all tests using xUnit
+
+- ---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-------------|
+| **Frontend** | React + Vite (TypeScript) |
+| **Backend** | ASP.NET Core 8 Web API |
+| **Database** | PostgreSQL |
+| **Cache** | Redis |
+| **Testing** | xUnit + WebApplicationFactory |
+| **CI/CD** | GitHub Actions |
+| **Deployment** | Backend via Docker / Frontend via Vercel |
+
+---
+
+## Author
+
+**Chuma**  
+Backend Engineer • Automation Developer • Cloud Enthusiast  
+[GitHub @chumavii](https://github.com/chumavii)
+
