@@ -1,7 +1,7 @@
 # URL Shortener
 
 ![.NET](https://img.shields.io/badge/.NET-8.0-blue)
-![React](https://https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)
+![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)
 ![Docker](https://img.shields.io/badge/Docker-444444?logo=docker)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql)
 ![Redis](https://img.shields.io/badge/Redis-4B4B4B?logo=redis)
