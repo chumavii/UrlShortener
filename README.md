@@ -1,12 +1,12 @@
 # URL Shortener
 
-!(https://img.shields.io/badge/.NET-8.0-blue?logo=dotnet)
-!(https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?logo=react)
+![.NET](https://img.shields.io/badge/.NET-8.0-blue?logo=dotnet)
+![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?logo=react)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
-!(https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql)
-!(https://img.shields.io/badge/Cache-Redis-DC382D?logo=redis)
-!(https://img.shields.io/github/actions/workflow/status/chumavii/url-shortener/ci.yml?label=CI%20Build&logo=github)
-!(https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql)
+![Redis](https://img.shields.io/badge/Cache-Redis-DC382D?logo=redis)
+![GitHub Actions](https://img.shields.io/github/actions/workflow/status/chumavii/url-shortener/ci.yml?label=CI%20Build&logo=github)
+![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)
 
 ---
 
