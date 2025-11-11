@@ -1,4 +1,4 @@
-# URL Shortener
+# URL Shortener 
 
 ![.NET](https://img.shields.io/badge/.NET-8.0-blue)
 ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)
@@ -13,7 +13,7 @@
 ## Overview
 
 A **full-stack URL shortening service** built with **.NET 8 Web API**, **PostgreSQL**, and **Redis**, paired with a **React + Vite** frontend.  
-The backend is **containerized with Docker** for consistent development, testing, and deployment, while the frontend is **deployed on Vercel** for fast, globally distributed delivery.
+The backend is **containerized with Docker** for consistent development, testing, and deployment, while the frontend is **deployed on Vercel**.
 
 <img width="824" height="606" alt="image" src="https://github.com/user-attachments/assets/a137b5cd-71eb-4ec0-aa8e-d986a3777ffb" />
 
@@ -45,12 +45,14 @@ The backend is **containerized with Docker** for consistent development, testing
 
 ---
 
-⚙️ Local Development
+## ⚙️ Local Development
 
-```bash
+
 1️. Clone the repository
+```bash
 git clone https://github.com/chumavii/UrlShortener.git
 cd urlshortener
+```
 
 2️. Create a .env file
 POSTGRES_USER=
@@ -60,25 +62,31 @@ REDIS_HOST=
 
 3️. Run the backend with Docker Compose
 docker compose up --build
-This starts:
-- The .NET 8 API
-- PostgreSQL
-- Redis
+# This starts:
+# - The .NET 8 API
+# - PostgreSQL
+# - Redis
 
-API available at → http://localhost:8080
+# API available at → http://localhost:8080
 
 4️. Run the frontend (Vite)
+```bash
 cd urlshortener.ui
 npm install
 npm run dev
+```
 
-Running Tests
+---
+
+## 🧪 Running Tests
+
 To run the full integration test suite locally:
+
+```bash
 dotnet test
+```
 
 Your CI pipeline automatically:
-- Spins up PostgreSQL & Redis containers
-- Waits until services are healthy
+- Spins up PostgreSQL & Redis containers  
+- Waits until services are healthy  
 - Runs all tests using xUnit
-
-
