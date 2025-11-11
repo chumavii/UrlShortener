@@ -44,7 +44,6 @@ builder.Services.AddCors(options =>
 //Rate Limiter Service
 builder.Services.AddRateLimiter(option =>
 {
-    //option.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     option.OnRejected = async (context, token) =>
     {
         var ip = context.HttpContext.Connection.RemoteIpAddress?.ToString();

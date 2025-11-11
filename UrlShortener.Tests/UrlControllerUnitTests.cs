@@ -74,7 +74,7 @@ namespace UrlShortener.Tests
         }
 
         [Fact]
-        public async Task ShortenUrl_AddsHttpsIfMissinge()
+        public async Task ShortenUrl_AddsHttpsIfMissing()
         {
             //Arrange
             var dto = new UrlMappingDto { OriginalUrl = "www.testr.com" };
@@ -93,8 +93,8 @@ namespace UrlShortener.Tests
 
             //Act
             var result = await _controller.ShortenUrl(dto) as OkObjectResult;
-            var response = result?.Value;
-            var shortUrl = response?.GetType().GetProperty("shortUrl")?.GetValue(response, null)?.ToString();
+            var response = Assert.IsType<ShortenUrlResposeDto>(result?.Value);
+            var shortUrl = response.ShortUrl;
 
             //Assert
             Assert.StartsWith("https", shortUrl);

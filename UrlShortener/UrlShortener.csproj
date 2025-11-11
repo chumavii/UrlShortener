@@ -28,10 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\.env" Link=".env" />
     <None Include="..\.github\workflows\ci.yml" Link="ci.yml" />
     <None Include="..\.gitignore" Link=".gitignore" />

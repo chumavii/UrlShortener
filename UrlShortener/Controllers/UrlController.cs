@@ -23,6 +23,10 @@ namespace UrlShortener.Controllers
         /// </summary>
         /// <returns>Short url but only short code is posted to db.</returns>
         [HttpPost]
+        [ProducesResponseType(typeof(UrlMappingDto), StatusCodes.Status302Found)]
+        [ProducesResponseType(typeof(UrlMappingDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> ShortenUrl(UrlMappingDto model)
         {
             if (string.IsNullOrEmpty(model.OriginalUrl))
@@ -39,21 +43,31 @@ namespace UrlShortener.Controllers
             var db = _redis.GetDatabase();
             var cachedCode = await db.StringGetAsync($"url:{originalUrl}");
             if (!cachedCode.IsNullOrEmpty)
-                return Ok(new { shortUrl = $"{Request.Scheme}://{Request.Host}/{cachedCode}" });
+            {
+                var resultDto = new ShortenUrlResposeDto
+                {
+                    ShortUrl = $"{Request.Scheme}://{Request.Host}/{cachedCode}"
+                };
+                return Ok(resultDto);
+            }
 
             //If record is in db but not cache, add to cache then return short url
-            var existing = await _context.UrlMappings.FirstOrDefaultAsync(x => x.OriginalUrl == originalUrl);
-            if (existing != null)
+            var record = await _context.UrlMappings.FirstOrDefaultAsync(x => x.OriginalUrl == originalUrl);
+            if (record != null)
             {
                 try
                 {
-                    await db.StringSetAsync($"url:{existing.OriginalUrl}", existing.ShortCode);
-                    await db.StringSetAsync(existing.ShortCode, existing.OriginalUrl);
+                    await db.StringSetAsync($"url:{record.OriginalUrl}", record.ShortCode);
+                    await db.StringSetAsync(record.ShortCode, record.OriginalUrl);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Failed to cache URL mapping for {existing.OriginalUrl}", e.Message);
-                    return Ok(new { shortUrl = $"{Request.Scheme}://{Request.Host}/{existing.ShortCode}" });
+                    Console.WriteLine($"Failed to cache URL mapping for {record.OriginalUrl}", e.Message);
+                    var resultDto = new ShortenUrlResposeDto
+                    {
+                        ShortUrl = $"{Request.Scheme}://{Request.Host}/{record.ShortCode}"
+                    };
+                    return Ok(resultDto);
                 }
             }
 
@@ -78,8 +92,12 @@ namespace UrlShortener.Controllers
             await _context.SaveChangesAsync();
             await db.StringSetAsync(shortCode, originalUrl);
             await db.StringSetAsync($"url:{originalUrl}", shortCode);
-
-            return Ok(new { shortUrl = $"{Request.Scheme}://{Request.Host}/{shortCode}" });
+            var result = new ShortenUrlResposeDto
+            {
+                ShortUrl = $"{Request.Scheme}://{Request.Host}/{shortCode}"
+            };
+            
+            return Ok(result);
         }
 
 
@@ -87,6 +105,10 @@ namespace UrlShortener.Controllers
         /// Redirects from short URL to original URL if browser or returns original URL if api call
         /// </summary>
         [HttpGet("{shortCode}")]
+        [ProducesResponseType(StatusCodes.Status302Found)]
+        [ProducesResponseType(typeof(UrlMappingDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> RedirectToOriginal(string shortCode)
         {
             var db = _redis.GetDatabase();
@@ -125,6 +147,10 @@ namespace UrlShortener.Controllers
             return Ok(new { originalUrl = entity.OriginalUrl });
         }
 
+
+        /*--------
+         Helpers
+        ---------*/
         private string EnsureUrlHasScheme(string url)
         {
             if (!url.StartsWith("http://") && !url.StartsWith("https://"))
