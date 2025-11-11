@@ -34,6 +34,7 @@
     <None Include="..\docker-compose.override.yml" Link="docker-compose.override.yml" />
     <None Include="..\docker-compose.test.yml" Link="docker-compose.test.yml" />
     <None Include="..\docker-compose.yml" Link="docker-compose.yml" />
+    <None Include="..\README.md" Link="README.md" />
   </ItemGroup>
 
   <ItemGroup>
