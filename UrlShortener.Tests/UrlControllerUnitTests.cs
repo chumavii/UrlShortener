@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using StackExchange.Redis;
-using System.Net.Http.Json;
 using UrlShortener.Controllers;
 using UrlShortener.Data;
 using UrlShortener.Models;
@@ -24,6 +24,7 @@ namespace UrlShortener.Tests
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
+
             _context = new ApplicationDbContext(options);
             var mockDatabase = new Mock<IDatabase>();
             mockDatabase
@@ -43,10 +44,13 @@ namespace UrlShortener.Tests
                     It.IsAny<CommandFlags>()
                 ))
                 .ReturnsAsync((RedisValue)string.Empty);
+
             _redisMock = new Mock<IConnectionMultiplexer>();
             _redisMock.Setup(r => r.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
                       .Returns(mockDatabase.Object);
-            _controller = new UrlController(_context, _redisMock.Object);
+
+            var mockLogger = new Mock<ILogger<UrlController>>();
+            _controller = new UrlController(_context, _redisMock.Object, mockLogger.Object);
             _client = factory.CreateClient();
         }
         [Fact]
