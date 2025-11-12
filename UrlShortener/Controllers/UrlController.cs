@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
-using System;
 using UrlShortener.Data;
 using UrlShortener.Models;
 using UrlShortener.Models.DTOs;
@@ -13,10 +12,18 @@ namespace UrlShortener.Controllers
     [EnableRateLimiting("PerIpLimit")]
     [ApiController]
     [Route("/")]
-    public class UrlController(ApplicationDbContext context, IConnectionMultiplexer redis) : ControllerBase
+    public class UrlController : ControllerBase
     {
-        private readonly ApplicationDbContext _context = context;
-        public readonly IConnectionMultiplexer _redis = redis;
+        private readonly ApplicationDbContext _context;
+        public readonly IConnectionMultiplexer _redis;
+        private readonly ILogger<UrlController> _logger;
+
+        public UrlController(ApplicationDbContext context, IConnectionMultiplexer redis, ILogger<UrlController> logger)
+        {
+            _context = context;
+            _redis = redis;
+            _logger = logger;
+        }
 
         /// <summary>
         /// Shortens the given URL and returns a short code.
@@ -44,6 +51,7 @@ namespace UrlShortener.Controllers
             var cachedCode = await db.StringGetAsync($"url:{originalUrl}");
             if (!cachedCode.IsNullOrEmpty)
             {
+                _logger.LogInformation($"Cache hit for short code: {cachedCode}");
                 var resultDto = new ShortenUrlResposeDto
                 {
                     ShortUrl = $"{Request.Scheme}://{Request.Host}/{cachedCode}"
@@ -57,12 +65,13 @@ namespace UrlShortener.Controllers
             {
                 try
                 {
+                    _logger.LogInformation($"Cache miss for short code: {cachedCode}. Caching now.");
                     await db.StringSetAsync($"url:{record.OriginalUrl}", record.ShortCode);
                     await db.StringSetAsync(record.ShortCode, record.OriginalUrl);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Failed to cache URL mapping for {record.OriginalUrl}", e.Message);
+                    _logger.LogError($"Failed to cache URL mapping for {record.OriginalUrl}", e.Message);
                     var resultDto = new ShortenUrlResposeDto
                     {
                         ShortUrl = $"{Request.Scheme}://{Request.Host}/{record.ShortCode}"
@@ -76,6 +85,7 @@ namespace UrlShortener.Controllers
             bool codeExists;
             do
             {
+                _logger.LogInformation("Generating new short code.");
                 shortCode = Url64Helper.Encode(originalUrl + Guid.NewGuid());
                 codeExists = _context.UrlMappings.Any(c => c.ShortCode == shortCode);
             }
@@ -112,6 +122,8 @@ namespace UrlShortener.Controllers
         public async Task<ActionResult> RedirectToOriginal(string shortCode)
         {
             var db = _redis.GetDatabase();
+            var isBrowser = IsBrowserRequest(Request);
+            _logger.LogInformation($"Is Browser: {isBrowser}");
 
             //Check if shortcode is stored in cache and return original URL if it is
             var cachedUrl = await db.StringGetAsync(shortCode);
@@ -119,13 +131,10 @@ namespace UrlShortener.Controllers
             {
                 try
                 {
-                    if (IsBrowserRequest(Request))
-                    {
-                        Console.WriteLine("Is browser request: " + true);
+                    _logger.LogInformation($"Cache hit for short code: {shortCode}");
+                    if (isBrowser)
                         return Redirect(EnsureUrlHasScheme(cachedUrl.ToString()));
-                    }
 
-                    Console.WriteLine("Is browser request: " + false);
                     return Ok(new { originalUrl = cachedUrl.ToString() });
                 }
                 catch (Exception e)
@@ -139,9 +148,10 @@ namespace UrlShortener.Controllers
             if (entity == null) return NotFound("Short URL not found.");
 
             //Store record in cache
+            _logger.LogInformation($"Cache miss for short code: {shortCode}. Caching now.");
             await db.StringSetAsync(shortCode, entity.OriginalUrl);
 
-            if (IsBrowserRequest(Request))
+            if (isBrowser)
                 return Redirect(entity.OriginalUrl);
 
             return Ok(new { originalUrl = entity.OriginalUrl });

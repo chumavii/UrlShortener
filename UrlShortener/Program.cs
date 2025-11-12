@@ -1,8 +1,6 @@
 using CorrelationId;
 using CorrelationId.DependencyInjection;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Serilog;
 using StackExchange.Redis;
 using System.Threading.RateLimiting;
@@ -89,8 +87,6 @@ builder.Host.UseSerilog((context, config) =>
     config
     .Enrich.FromLogContext()
     .Enrich.WithCorrelationId()
-    .WriteTo.Console()
-    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
     .ReadFrom.Configuration(context.Configuration);
 });
 
